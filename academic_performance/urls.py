@@ -1,6 +1,7 @@
 from django.urls import path
-from academic_performance.views import index
+from . import views
 
 urlpatterns = [
-    path('', index),
+    path('', views.index),
+    path('students', views.students),
 ]

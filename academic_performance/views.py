@@ -1,7 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+
+import functionalModule
 
 
 def index(request):
-    print(request)
     return HttpResponse('Hello world!')
+
+
+def students(request):
+    return HttpResponse(functionalModule.func.select_students())
