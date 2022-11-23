@@ -47,7 +47,6 @@ def update_student(studentid, lecture_visits=None, practice_visits=None, practic
         args["practice"] = practice
     if len(args) == 0:
         return False
-    print((*args.values(), studentid))
     reqargs = ' = ?, '.join(args.keys()) + " = ?"
     request = f"UPDATE performance SET {reqargs} WHERE studentid = ?;"
     with closing(connection.cursor()) as cursor:

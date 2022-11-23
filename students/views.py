@@ -38,7 +38,7 @@ def index(request):
         student = select(studentid)
         if student is None:
             raise Http404(toJson({"status": "error", "description": "Студент не найден"}))
-        if students.delete_student(studentid):
+        if students.delete_student(studentid) is not None:
             return HttpResponse(toJson({"status": "successful", "object": student}))
         else:
             return HttpResponseServerError(toJson({"status": "error", "object": student,
@@ -55,15 +55,7 @@ def index(request):
         sname = request.GET.get('second_name')
         lname = request.GET.get('last_name')
         group = request.GET.get('groupid')
-        if fname is None:
-            return HttpResponseBadRequest(toJson({"status": "error", "description": f"Отсутствует параметр first_name"}))
-        if sname is None:
-            return HttpResponseBadRequest(toJson({"status": "error", "description": f"Отсутствует параметр second_name"}))
-        if lname is None:
-            return HttpResponseBadRequest(toJson({"status": "error", "description": f"Отсутствует параметр last_name"}))
-        if group is None:
-            return HttpResponseBadRequest(toJson({"status": "error", "description": f"Отсутствует параметр groupid"}))
-        if students.update_student(studentid, fname, sname, lname, group):
+        if students.update_student(studentid, fname, sname, lname, group) is not None:
             student = select(studentid)
             return HttpResponse(toJson({"status": "successful", "object": student}))
         else:
@@ -89,7 +81,7 @@ def index(request):
             return HttpResponseBadRequest(toJson({"status": "error", "description": "Отсутствует параметр last_name"}))
         if group is None:
             return HttpResponseBadRequest(toJson({"status": "error", "description": "Отсутствует параметр groupid"}))
-        if students.insert_student(studentid, fname, sname, lname, group):
+        if students.insert_student(studentid, fname, sname, lname, group) is not None:
             student = select(studentid)
             return HttpResponse(toJson({"status": "successful", "object": student}))
         else:
