@@ -8,7 +8,9 @@ connection = sqlite3.connect('students.db', check_same_thread=False)
 # Create (insert) operation - C
 def insert_student(studentid, fname, sname, lname, groupid):
     with closing(connection.cursor()) as cursor:
-        result = cursor.execute(f"INSERT INTO students(studentid, fname, sname, lname, groupid) VALUES (?, ?, ?, ?, ?);", (studentid, fname, sname, lname, groupid))
+        result = cursor.execute(
+            f"INSERT INTO students(studentid, fname, sname, lname, groupid) VALUES (?, ?, ?, ?, ?);",
+            (studentid, fname, sname, lname, groupid))
         result = result.fetchone() is not None
     connection.commit()
     return result
@@ -51,9 +53,23 @@ def select_student(studentid=None, fname=None, sname=None, lname=None, groupid=N
 
 
 # Update operation - U
-def update_student(studentid, fname, sname, lname, groupid):
+def update_student(studentid, fname=None, sname=None, lname=None, groupid=None):
+    args = {}
+    if not (fname is None):
+        args["fname"] = fname
+    if not (sname is None):
+        args["sname"] = sname
+    if not (lname is None):
+        args["lname"] = lname
+    if not (groupid is None):
+        args["groupid"] = groupid
+    if len(args) == 0:
+        return False
+    print((*args.values(), studentid))
+    reqargs = ' = ?, '.join(args.keys()) + " = ?"
+    request = f"UPDATE performance SET {reqargs} WHERE studentid = ?;"
     with closing(connection.cursor()) as cursor:
-        result = cursor.execute("UPDATE students SET fname = ?, sname = ?, lname = ?, groupid = ? WHERE studentid = ?", (fname, sname, lname, groupid, studentid))
+        result = cursor.execute(request, (*args.values(), studentid))
         result = result.fetchone() is not None
     connection.commit()
     return result

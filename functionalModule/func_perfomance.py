@@ -6,9 +6,9 @@ connection = sqlite3.connect('academic-performance.db', check_same_thread=False)
 
 
 # Create (insert) operation - C
-def insert_student(subject, studentid):
+def insert_student(studentid):
     with closing(connection.cursor()) as cursor:
-        result = cursor.execute(f"INSERT INTO {subject}(studentid) VALUES (?);", (studentid,))
+        result = cursor.execute(f"INSERT INTO performance(studentid) VALUES (?);", (studentid,))
         result = result.fetchone() is not None
     connection.commit()
     return result
@@ -17,30 +17,16 @@ def insert_student(subject, studentid):
 # Read operation - R
 def select_students():
     with closing(connection.cursor()) as cursor:
-        cursor.execute("SELECT * FROM students;")
+        cursor.execute("SELECT * FROM performance;")
         result = cursor.fetchall()
     connection.commit()
     return json.dumps(result, ensure_ascii=False)
 
 
-def select_student(studentid=None, fname=None, sname=None, lname=None, groupid=None):
-    args = {}
-    if not (studentid is None):
-        args["studentid"] = studentid
-    if not (fname is None):
-        args["fname"] = fname
-    if not (sname is None):
-        args["sname"] = sname
-    if not (lname is None):
-        args["lname"] = lname
-    if not (groupid is None):
-        args["groupid"] = groupid
-    if len(args) == 0:
-        return select_students()
-    reqargs = ' = ? AND '.join(args.keys()) + " = ?"
-    request = "SELECT * FROM students WHERE " + reqargs + ";"
+def select_student(studentid):
+    request = "SELECT * FROM performance WHERE studentid = ?;"
     with closing(connection.cursor()) as cursor:
-        cursor.execute(request, list(args.values()))
+        cursor.execute(request, (studentid,))
         result = cursor.fetchall()
     connection.commit()
     obj = json.dumps(result, ensure_ascii=False)
@@ -51,9 +37,21 @@ def select_student(studentid=None, fname=None, sname=None, lname=None, groupid=N
 
 
 # Update operation - U
-def update_student(studentid, fname, sname, lname, groupid):
+def update_student(studentid, lecture_visits=None, practice_visits=None, practice=None):
+    args = {}
+    if not (lecture_visits is None):
+        args["lecture_visits"] = lecture_visits
+    if not (practice_visits is None):
+        args["practice_visits"] = practice_visits
+    if not (practice is None):
+        args["practice"] = practice
+    if len(args) == 0:
+        return False
+    print((*args.values(), studentid))
+    reqargs = ' = ?, '.join(args.keys()) + " = ?"
+    request = f"UPDATE performance SET {reqargs} WHERE studentid = ?;"
     with closing(connection.cursor()) as cursor:
-        result = cursor.execute("UPDATE students SET fname = ?, sname = ?, lname = ?, groupid = ? WHERE studentid = ?", (fname, sname, lname, groupid, studentid))
+        result = cursor.execute(request, (*args.values(), studentid))
         result = result.fetchone() is not None
     connection.commit()
     return result
@@ -62,7 +60,7 @@ def update_student(studentid, fname, sname, lname, groupid):
 # Delete operation - D
 def delete_student(studentid):
     with closing(connection.cursor()) as cursor:
-        result = cursor.execute("DELETE FROM students WHERE studentid = ?;", (studentid,))
+        result = cursor.execute("DELETE FROM performance WHERE studentid = ?;", (studentid,))
         result = result.fetchone() is not None
     connection.commit()
     return result
